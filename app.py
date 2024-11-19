@@ -41,6 +41,7 @@ def get_box_inputs(prompts):
             box_inputs.append((prompt[0], prompt[1], prompt[3], prompt[4]))
     return box_inputs
 
+@spaces.GPU
 def rag_gen(
     box_prompt_image, 
     prompt, 
