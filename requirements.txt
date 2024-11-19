@@ -1,0 +1,7 @@
+xformers==0.0.28.post1
+diffusers
+peft
+torchvision==0.19.1
+opencv-python==4.10.0.84
+sentencepiece==0.2.0
+protobuf==5.28.1
