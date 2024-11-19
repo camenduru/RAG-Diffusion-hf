@@ -16,7 +16,6 @@ from RAG_pipeline_flux import RAG_FluxPipeline
 MAX_SEED = 999999
 
 pipe = RAG_FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-dev", torch_dtype=torch.bfloat16)
-pipe = pipe.to("cuda")
 
 global run_nums
 
@@ -53,7 +52,7 @@ def rag_gen(
     guidance_scale, 
     seed, 
     randomize_seed):
-
+    pipe = pipe.to("cuda")
     points, image = box_prompt_image['points'], box_prompt_image['image']
     print("points", points)
     box_inputs = get_box_inputs(points)
