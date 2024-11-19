@@ -62,7 +62,7 @@ def rag_gen(
     # GREEN = (36, 255, 12)
 
     HB_prompt_list = coarse_prompt.split("BREAK")
-    print("HB_prompt_list",HB_prompt_list)
+    # print("HB_prompt_list",HB_prompt_list)
     # for i, box in enumerate(box_inputs):
     #     x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
     #     cv2.rectangle(image, (x1, y1), (x2, y2), GREEN, 2)
