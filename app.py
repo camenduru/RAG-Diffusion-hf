@@ -7,6 +7,7 @@ import base64
 import requests
 import json
 import time
+import spaces
 from gradio_box_promptable_image import BoxPromptableImage
 from gen_box_func import generate_parameters, visualize
 
