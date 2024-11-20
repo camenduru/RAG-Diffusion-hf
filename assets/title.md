@@ -11,7 +11,7 @@
     </div>
     <br>
     <div style="display: flex; justify-content: center; align-items: center; text-align: center; font-size: 18px;">
-      <strong style="color: blue; font-weight: bold;">Note: </strong>A simplified demo of our RAG-Diffusion (For more complex layouts, please run our code directly.)
+      <strong style="color: blue; font-weight: bold;">Note: </strong>A simplified demo of our RAG-Diffusion (For more complex layouts, please run our code directly).
       <!-- currently featuring text-to-image functionality. -->
        <!-- Stay tuned for the upcoming repainting feature. -->
     </div>

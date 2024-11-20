@@ -16,7 +16,7 @@ from RAG_pipeline_flux import RAG_FluxPipeline
 
 MAX_SEED = 999999
 
-pipe = RAG_FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-dev", torch_dtype=torch.bfloat16)
+pipe = RAG_FluxPipeline.from_pretrained("/nasdata/znchen/nju_reseach/FLUX.1-dev/", torch_dtype=torch.bfloat16)
 pipe = pipe.to("cuda")
 
 global run_nums
@@ -36,15 +36,30 @@ def read_run_num():
     return run_num
 
 def get_box_inputs(prompts):
+
+    # if isinstance(prompts, str):
+    #     prompts = json.loads(prompts)
+    if prompts=="layout1":
+        prompts=[[0.05*1024, 0.05*1024, 2.0, (0.05+0.40)*1024, (0.05+0.9)*1024, 3.0], [0.5*1024, 0.05*1024, 2.0, (0.5+0.45)*1024, (0.05+0.9)*1024, 3.0]]
+    elif prompts=="layout2":
+        prompts=[[20.0, 425.0, 2.0, 551.0, 1008.0, 3.0], [615.0, 84.0, 2.0, 1000.0, 389.0, 3.0]]
+    elif prompts=="layout3":
+        prompts=[[0.2*1024, 0.1*1024, 2.0, (0.2+0.6)*1024, (0.1+0.4)*1024, 3.0],[0.2*1024, 0.6*1024, 2.0, (0.2+0.6)*1024, (0.6+0.35)*1024, 3.0]]
+    elif prompts=="layout4":
+        prompts=[[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]]
     box_inputs = []
+
     for prompt in prompts:
+        # print("prompt",prompt)
         if prompt[2] == 2.0 and prompt[5] == 3.0:
             box_inputs.append((prompt[0], prompt[1], prompt[3], prompt[4]))
     return box_inputs
 
 @spaces.GPU
 def rag_gen(
-    box_prompt_image, 
+    # box_prompt_image, 
+    box_point,
+    box_image,
     prompt, 
     coarse_prompt, 
     detailed_prompt, 
@@ -53,8 +68,9 @@ def rag_gen(
     num_inference_steps, 
     guidance_scale, 
     seed, 
-    randomize_seed):
-    points, image = box_prompt_image['points'], box_prompt_image['image']
+    randomize_seed,
+    ):
+    points, image = box_point, box_image
     print("points", points)
     box_inputs = get_box_inputs(points)
     # prompt_img_height, prompt_img_width, _ = image.shape
@@ -63,11 +79,6 @@ def rag_gen(
     # GREEN = (36, 255, 12)
 
     HB_prompt_list = coarse_prompt.split("BREAK")
-    # print("HB_prompt_list",HB_prompt_list)
-    # for i, box in enumerate(box_inputs):
-    #     x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
-    #     cv2.rectangle(image, (x1, y1), (x2, y2), GREEN, 2)
-    #     cv2.putText(image, HB_prompt_list[i], (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, GREEN, 2)
 
 
     HB_m_offset_list, HB_n_offset_list, HB_m_scale_list, HB_n_scale_list, SR_hw_split_ratio = generate_parameters(box_inputs, prompt_img_width, prompt_img_height)
@@ -168,39 +179,31 @@ with gr.Blocks(css=css) as demo:
             )
 
             coarse_prompt = gr.Textbox(
-                label="Regional Fundamental Prompt(BREAK is a delimiter.)",
+                label="Regional Fundamental Prompt(BREAK is a delimiter).",
                 placeholder="Enter your prompt",
                 lines=2
             )
 
             detailed_prompt = gr.Textbox(
-                label="Regional Highly descriptive Prompt(BREAK is a delimiter.)",
+                label="Regional Highly descriptive Prompt(BREAK is a delimiter).",
                 placeholder="Enter your prompt",
                 lines=2
             )
 
 
         with gr.Column(elem_id="col-left"):
-
-            # gr.HTML("""
-            # <div style="display: flex; justify-content: center; align-items: center; text-align: center; font-size: 20px;">
-            #     <div>
-            #     Step 1.  First Plot Layout ⬇️
-            #     </div>
-            # </div>
-            # <div style="display: flex; justify-content: center; align-items: center; text-align: center; font-size: 10px;">
-            #     <div>
-            #     Please do not click the 'x' button; otherwise please refresh the webpage.
-            #     </div>
-            # </div>
-            # """)
             
             default_image_path = "assets/images_template.png"
-            box_prompt_image = BoxPromptableImage(
+            box_image = gr.Image(
                 show_label=False,
                 interactive=False,
                 label="Layout",
-                value={"image": default_image_path})
+                value=default_image_path)
+            # box_prompt_image = BoxPromptableImage(
+            #     show_label=False,
+            #     interactive=False,
+            #     label="Layout",
+            #     value={"image": default_image_path})
             # box_prompt_image = gr.Image(label="Layout", show_label=True)
             
             gr.HTML("""
@@ -277,15 +280,17 @@ with gr.Blocks(css=css) as demo:
 
             with gr.Row():
                 button = gr.Button("Run", elem_id="button")
-            
-    
+
+    box_point = gr.Textbox(visible=False)
     gr.on(
         triggers=[
             button.click,
         ],
         fn=rag_gen,
+        # fn=lambda *args: rag_gen(*args,[]),
         inputs=[
-            box_prompt_image, 
+            box_point,
+            box_image,
             prompt, 
             coarse_prompt, 
             detailed_prompt, 
@@ -293,7 +298,7 @@ with gr.Blocks(css=css) as demo:
             SR_delta, 
             num_inference_steps, 
             guidance_scale, seed, 
-            randomize_seed
+            randomize_seed,
         ],
         # outputs=[layout, result, seed, run_nums_box],
         outputs=[result, seed, run_nums_box],
@@ -306,8 +311,8 @@ with gr.Blocks(css=css) as demo:
             # label="Layout Example (For more complex layouts, please run our code directly.)",
             examples=[
                 [
+                    "layout1",
                     "assets/case1.png",
-                    [[0.05*1024, 0.05*1024, 2.0, (0.05+0.40)*1024, (0.05+0.9)*1024, 3.0], [0.5*1024, 0.05*1024, 2.0, (0.5+0.45)*1024, (0.05+0.9)*1024, 3.0]],  # BoxPromptableImage
                     "a man is holding a bag, a man is talking on a cell phone.",  # prompt
                     "A man holding a bag. BREAK a man holding a cell phone to his ear.",  # coarse_prompt
                     "A man holding a bag, gripping it firmly, with a casual yet purposeful stance. BREAK a man, engaged in conversation, holding a cell phone to his ear.",  # detailed_prompt
@@ -319,8 +324,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
+                    "layout2",
                     "assets/case2.png", 
-                    [[20.0, 425.0, 2.0, 551.0, 1008.0, 3.0], [615.0, 84.0, 2.0, 1000.0, 389.0, 3.0]],  # BoxPromptableImage
                     "A woman looking at the moon",  # prompt
                     "a woman BREAK a moon",  # coarse_prompt
                     "A woman, standing gracefully, her gaze fixed on the sky with a sense of wonder. BREAK The moon, luminous and full, casting a soft glow across the tranquil night.",  # detailed_prompt
@@ -332,8 +337,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
-                    "assets/case3.png", 
-                    [[0.2*1024, 0.1*1024, 2.0, (0.2+0.6)*1024, (0.1+0.4)*1024, 3.0],[0.2*1024, 0.6*1024, 2.0, (0.2+0.6)*1024, (0.6+0.35)*1024, 3.0]],  # BoxPromptableImage
+                    "layout3",
+                    "assets/case3.png",
                     "a turtle on the bottom of a phone",  # prompt
                     "Phone BREAK Turtle",  # coarse_prompt
                     "The phone, placed above the turtle, potentially with its screen or back visible, its sleek design prominent. BREAK The turtle, below the phone, with its shell textured and detailed, eyes slightly protruding as it looks upward.",  # detailed_prompt
@@ -345,8 +350,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
+                    "layout4",
                     "assets/case4.png",
-                    [[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]],  # BoxPromptableImage
                     "From left to right, a blonde ponytail Europe girl in white shirt, a brown curly hair African girl in blue shirt printed with a bird, an Asian young man with black short hair in suit are walking in the campus happily.",  # prompt
                     "A blonde ponytail European girl in a white shirt BREAK  A brown curly hair African girl in a blue shirt printed with a bird BREAK An Asian young man with black short hair in a suit",  # coarse_prompt
                     "A blonde ponytail European girl in a crisp white shirt, walking with a light smile. Her ponytail swings slightly as she enjoys the lively atmosphere of the campus. BREAK A brown curly hair African girl, her vibrant blue shirt adorned with a bird print. Her joyful expression matches her energetic stride as her curls bounce lightly in the breeze. BREAK An Asian young man in a sharp suit, his black short hair neatly styled, walking confidently alongside the two girls. His suit contrasts with the casual campus environment, adding an air of professionalism to the scene.",  # detailed_prompt
@@ -357,62 +362,10 @@ with gr.Blocks(css=css) as demo:
                     1234,  # seed
                     False,  # randomize_seed
                 ],
-                # [
-                #     {"image": "assets/case1.png", "points": [[0.1*1024, 0.55*1024, 2.0, (0.1+0.8)*1024, (0.55+0.4)*1024, 3.0],[0.1*1024, 0.05*1024, 2.0, (0.1+0.8)*1024, (0.05+0.45)*1024, 3.0]]},  # BoxPromptableImage
-                #     "a balloon on the bottom of a dog",  # prompt
-                #     "Balloon BREAK Dog",  # coarse_prompt
-                #     "A playful dog, perhaps a golden retriever, with its ears perked up, sitting on the balloon, giving an enthusiastic demeanor. BREAK A colorful balloon floating gently, its string dangling gracefully, just beneath the dog.",  # detailed_prompt
-                #     2,  # HB_replace
-                #     1.0,  # SR_delta
-                #     20,  # num_inference_steps
-                #     3.5,  # guidance_scale
-                #     1234,  # seed
-                #     False,  # randomize_seed
-                # ],
-
-                # [
-                #     {
-                #     "image": "assets/images_template.png", "points": [[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]]},  # BoxPromptableImage
-                #     "From left to right, a blonde ponytail Europe girl in white shirt, a brown curly hair African girl in blue shirt printed with a bird, an Asian young man with black short hair in suit are walking in the campus happily.",  # prompt
-                #     "A blonde ponytail European girl in a white shirt BREAK  A brown curly hair African girl in a blue shirt printed with a bird BREAK An Asian young man with black short hair in a suit",  # coarse_prompt
-                #     "A blonde ponytail European girl in a crisp white shirt, walking with a light smile. Her ponytail swings slightly as she enjoys the lively atmosphere of the campus. BREAK A brown curly hair African girl, her vibrant blue shirt adorned with a bird print. Her joyful expression matches her energetic stride as her curls bounce lightly in the breeze. BREAK An Asian young man in a sharp suit, his black short hair neatly styled, walking confidently alongside the two girls. His suit contrasts with the casual campus environment, adding an air of professionalism to the scene.",  # detailed_prompt
-                #     2,  # HB_replace
-                #     1.0,  # SR_delta
-                #     20,  # num_inference_steps
-                #     3.5,  # guidance_scale
-                #     1234,  # seed
-                #     False,  # randomize_seed
-                # ],
-                # [
-                #     {
-                #     "image": "assets/images_template.png", "points": [[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]]},  # BoxPromptableImage
-                #     "From left to right, a blonde ponytail Europe girl in white shirt, a brown curly hair African girl in blue shirt printed with a bird, an Asian young man with black short hair in suit are walking in the campus happily.",  # prompt
-                #     "A blonde ponytail European girl in a white shirt BREAK  A brown curly hair African girl in a blue shirt printed with a bird BREAK An Asian young man with black short hair in a suit",  # coarse_prompt
-                #     "A blonde ponytail European girl in a crisp white shirt, walking with a light smile. Her ponytail swings slightly as she enjoys the lively atmosphere of the campus. BREAK A brown curly hair African girl, her vibrant blue shirt adorned with a bird print. Her joyful expression matches her energetic stride as her curls bounce lightly in the breeze. BREAK An Asian young man in a sharp suit, his black short hair neatly styled, walking confidently alongside the two girls. His suit contrasts with the casual campus environment, adding an air of professionalism to the scene.",  # detailed_prompt
-                #     2,  # HB_replace
-                #     1.0,  # SR_delta
-                #     20,  # num_inference_steps
-                #     3.5,  # guidance_scale
-                #     1234,  # seed
-                #     False,  # randomize_seed
-                # ],
-                # [
-                #     {
-                #     "image": "assets/case1.png", "points": [[0.02*1024, 0.1*1024, 2.0, (0.02+0.21)*1024, (0.1+0.8)*1024, 3.0], [0.27*1024, 0.1*1024, 2.0, (0.27+0.21)*1024, (0.1+0.8)*1024, 3.0], [0.51*1024, 0.1*1024, 2.0, (0.51+0.21)*1024, (0.1+0.8)*1024, 3.0], [0.77*1024, 0.1*1024, 2.0, (0.77+0.21)*1024, (0.1+0.8)*1024, 3.0]]},  # BoxPromptableImage
-                #     "From left to right, Pink blossoming trees, Green sycamore trees, Golden maples and Snow-blanketed pines",  # prompt
-                #     "Pink blossoming trees BREAK Green sycamore trees BREAK Golden maples BREAK Snow-blanketed pines",  # coarse_prompt
-                #     "Pink blossoming trees fill the atmosphere with a delicate charm, their petals creating a soft carpet beneath them. BREAK Green sycamore trees stand tall and sturdy, their broad leaves casting a lush shade over the ground. BREAK Golden maples display a vibrant hue, their leaves shimmering like gold coins under the sun. BREAK Snow-blanketed pines offer a serene contrast, their branches heavy with snow, creating an image of winter quietude.",  # detailed_prompt
-                #     2,  # HB_replace
-                #     1.0,  # SR_delta
-                #     20,  # num_inference_steps
-                #     3.5,  # guidance_scale
-                #     1236,  # seed
-                #     False,  # randomize_seed
-                # ],
             ],
             inputs=[
-                box_prompt_image.image,
-                box_prompt_image.points,
+                box_point,
+                box_image,
                 prompt, 
                 coarse_prompt, 
                 detailed_prompt, 
@@ -424,7 +377,7 @@ with gr.Blocks(css=css) as demo:
                 randomize_seed
             ],
             outputs=None,
-            fn=None,
+            fn=rag_gen,
             cache_examples=False,
         )
 
