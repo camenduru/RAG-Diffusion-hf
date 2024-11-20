@@ -16,7 +16,7 @@ from RAG_pipeline_flux import RAG_FluxPipeline
 
 MAX_SEED = 999999
 
-pipe = RAG_FluxPipeline.from_pretrained("/nasdata/znchen/nju_reseach/FLUX.1-dev/", torch_dtype=torch.bfloat16)
+pipe = RAG_FluxPipeline.from_pretrained("black-forest-labs/FLUX.1-dev", torch_dtype=torch.bfloat16)
 pipe = pipe.to("cuda")
 
 global run_nums
