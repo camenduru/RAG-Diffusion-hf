@@ -112,8 +112,8 @@ def rag_gen(
     run_num = update_run_num()
 
     # return image, rag_image, seed, f"<span style='font-size: 16px; font-weight: bold; color: red; display: block; text-align: center;'>Total inference runs: {run_num}</span>"
-    return rag_image, seed, f"<span style='font-size: 16px; font-weight: bold; color: red; display: block; text-align: center;'>Total inference runs: {run_num}</span>"
-
+    # return rag_image, seed, f"<span style='font-size: 16px; font-weight: bold; color: red; display: block; text-align: center;'>Total inference runs: {run_num}</span>"
+    return rag_image, seed
 
 example_path = os.path.join(os.path.dirname(__file__), 'assets')
 
@@ -152,9 +152,9 @@ def load_description(fp):
 with gr.Blocks(css=css) as demo:
     gr.HTML(load_description("assets/title.md"))
     
-    run_nums_box = gr.Markdown(
-        value=f"<span style='font-size: 16px; font-weight: bold; color: red; display: block; text-align: center;'>Total inference runs: {run_num}</span>"
-    )
+    # run_nums_box = gr.Markdown(
+    #     value=f"<span style='font-size: 16px; font-weight: bold; color: red; display: block; text-align: center;'>Total inference runs: {run_num}</span>"
+    # )
     
     with gr.Row():
         
@@ -225,6 +225,11 @@ with gr.Blocks(css=css) as demo:
             <div style="display: flex; justify-content: center; align-items: center; text-align: center; font-size: 20px;">
                 <div>
                 Step 2. Press “Run” to get results 
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center; text-align: center; font-size: 10px;">
+                <div>
+                Errors may be displayed due to insufficient computing power
                 </div>
             </div>
             """)
@@ -301,7 +306,8 @@ with gr.Blocks(css=css) as demo:
             randomize_seed,
         ],
         # outputs=[layout, result, seed, run_nums_box],
-        outputs=[result, seed, run_nums_box],
+        # outputs=[result, seed, run_nums_box],
+        outputs=[result, seed],
         api_name="run",
     )
 
