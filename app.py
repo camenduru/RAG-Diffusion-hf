@@ -185,7 +185,7 @@ with gr.Blocks(css=css) as demo:
             )
 
             detailed_prompt = gr.Textbox(
-                label="Regional Highly descriptive Prompt(BREAK is a delimiter).",
+                label="Regional Highly Descriptive Prompt(BREAK is a delimiter).",
                 placeholder="Enter your prompt",
                 lines=2
             )
@@ -346,7 +346,7 @@ with gr.Blocks(css=css) as demo:
                     0.8,  # SR_delta
                     20,  # num_inference_steps
                     3.5,  # guidance_scale
-                    1234,  # seed
+                    1233,  # seed
                     False,  # randomize_seed
                 ],
                 [
