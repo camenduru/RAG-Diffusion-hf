@@ -306,7 +306,8 @@ with gr.Blocks(css=css) as demo:
             # label="Layout Example (For more complex layouts, please run our code directly.)",
             examples=[
                 [
-                    {"image": "assets/case1.png", "points": [[0.05*1024, 0.05*1024, 2.0, (0.05+0.40)*1024, (0.05+0.9)*1024, 3.0], [0.5*1024, 0.05*1024, 2.0, (0.5+0.45)*1024, (0.05+0.9)*1024, 3.0]]},  # BoxPromptableImage
+                    "image": "assets/case1.png",
+                    "points": [[0.05*1024, 0.05*1024, 2.0, (0.05+0.40)*1024, (0.05+0.9)*1024, 3.0], [0.5*1024, 0.05*1024, 2.0, (0.5+0.45)*1024, (0.05+0.9)*1024, 3.0]],  # BoxPromptableImage
                     "a man is holding a bag, a man is talking on a cell phone.",  # prompt
                     "A man holding a bag. BREAK a man holding a cell phone to his ear.",  # coarse_prompt
                     "A man holding a bag, gripping it firmly, with a casual yet purposeful stance. BREAK a man, engaged in conversation, holding a cell phone to his ear.",  # detailed_prompt
@@ -318,7 +319,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
-                    {"image": "assets/case2.png", "points": [[20.0, 425.0, 2.0, 551.0, 1008.0, 3.0], [615.0, 84.0, 2.0, 1000.0, 389.0, 3.0]]},  # BoxPromptableImage
+                    "image": "assets/case2.png", 
+                    "points": [[20.0, 425.0, 2.0, 551.0, 1008.0, 3.0], [615.0, 84.0, 2.0, 1000.0, 389.0, 3.0]],  # BoxPromptableImage
                     "A woman looking at the moon",  # prompt
                     "a woman BREAK a moon",  # coarse_prompt
                     "A woman, standing gracefully, her gaze fixed on the sky with a sense of wonder. BREAK The moon, luminous and full, casting a soft glow across the tranquil night.",  # detailed_prompt
@@ -330,7 +332,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
-                    {"image": "assets/case3.png", "points": [[0.2*1024, 0.1*1024, 2.0, (0.2+0.6)*1024, (0.1+0.4)*1024, 3.0],[0.2*1024, 0.6*1024, 2.0, (0.2+0.6)*1024, (0.6+0.35)*1024, 3.0]]},  # BoxPromptableImage
+                    "image": "assets/case3.png", 
+                    "points": [[0.2*1024, 0.1*1024, 2.0, (0.2+0.6)*1024, (0.1+0.4)*1024, 3.0],[0.2*1024, 0.6*1024, 2.0, (0.2+0.6)*1024, (0.6+0.35)*1024, 3.0]],  # BoxPromptableImage
                     "a turtle on the bottom of a phone",  # prompt
                     "Phone BREAK Turtle",  # coarse_prompt
                     "The phone, placed above the turtle, potentially with its screen or back visible, its sleek design prominent. BREAK The turtle, below the phone, with its shell textured and detailed, eyes slightly protruding as it looks upward.",  # detailed_prompt
@@ -342,7 +345,8 @@ with gr.Blocks(css=css) as demo:
                     False,  # randomize_seed
                 ],
                 [
-                    {"image": "assets/case4.png", "points": [[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]]},  # BoxPromptableImage
+                    "image": "assets/case4.png",
+                    "points": [[9.0, 153.0, 2.0, 343.0, 959.0, 3.0], [376.0, 145.0, 2.0, 692.0, 959.0, 3.0], [715.0, 143.0, 2.0, 1015.0, 956.0, 3.0]],  # BoxPromptableImage
                     "From left to right, a blonde ponytail Europe girl in white shirt, a brown curly hair African girl in blue shirt printed with a bird, an Asian young man with black short hair in suit are walking in the campus happily.",  # prompt
                     "A blonde ponytail European girl in a white shirt BREAK  A brown curly hair African girl in a blue shirt printed with a bird BREAK An Asian young man with black short hair in a suit",  # coarse_prompt
                     "A blonde ponytail European girl in a crisp white shirt, walking with a light smile. Her ponytail swings slightly as she enjoys the lively atmosphere of the campus. BREAK A brown curly hair African girl, her vibrant blue shirt adorned with a bird print. Her joyful expression matches her energetic stride as her curls bounce lightly in the breeze. BREAK An Asian young man in a sharp suit, his black short hair neatly styled, walking confidently alongside the two girls. His suit contrasts with the casual campus environment, adding an air of professionalism to the scene.",  # detailed_prompt
